@@ -1,0 +1,1 @@
+call pio run -t upload

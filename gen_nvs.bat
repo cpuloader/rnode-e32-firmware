@@ -1,0 +1,1 @@
+call pio run -t generate_nvs -e esp32c3_mini

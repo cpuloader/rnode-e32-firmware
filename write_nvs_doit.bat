@@ -1,0 +1,1 @@
+call pio run -t write_nvs -e esp32doit-devkit-v1

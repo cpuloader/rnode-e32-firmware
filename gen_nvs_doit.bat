@@ -1,0 +1,1 @@
+call pio run -t generate_nvs -e esp32doit-devkit-v1
