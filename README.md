@@ -1,17 +1,18 @@
 # RNode Firmware for ESP32 + EBYTE E32-170T30D
 
-E32-170T30D is 1W 170MHz module, have no SPI interface, UART only.
+E32-170T30D is 1W 170MHz module, have no SPI interface, UART only.  
 
-Boards currently supported:
-ESP32C3
-ESP32 DOIT DEVKIT v1
+## Boards currently supported:
+ESP32C3  
+ESP32 DOIT DEVKIT v1  
 
-ESP32 can be connected to RNodeInterface by USB Serial, WIFI or BLE.
+## ESP32 can be connected to RNodeInterface by USB Serial, WIFI or BLE.
 
-Frequency can be 160-173.5MHZ with 250KHz step.
-Air data rate can be controlled by SF (7-12) parameter in interface.
+Frequency can be 160-173.5MHZ with 250KHz step.  
+Air data rate can be controlled by SF (7-12) parameter in interface.  
 
-For NVS partition create secrets.ini file with data like this:
+## For NVS partition create secrets.ini file with data like this:  
+```
 [esp32doit-devkit-v1]
 NVS_WIFISSID = yourssid
 NVS_WIFIPSK  = yourpasswd
@@ -23,3 +24,4 @@ NVS_WIFISSID = no
 NVS_WIFIPSK  = no
 NVS_WIFION   = 0
 NVS_BLEON    = 1
+```
