@@ -1,1 +1,1 @@
-call pio device monitor -p COM15 -b 19200
+call pio device monitor -p COM10 -b 19200

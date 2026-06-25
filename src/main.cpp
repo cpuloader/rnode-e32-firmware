@@ -148,7 +148,17 @@ unsigned long air_time_window_start = 0;
 bool airtime_lock = false;
 unsigned long last_duty_log_time = 0;
 
+//unsigned long last_lbt_time = 0;
+
 bool can_transmit() {
+  // Kind of primitive LBT, if it is LOW, we can be receiving.
+  /*if (digitalRead(AUX_PIN) == LOW) {
+    last_lbt_time = millis();
+    return false;
+  }
+  // Wait a little after last low AUX, we can be between RX chunks
+  if (millis() - last_lbt_time < 150) return false;*/
+
   if (lt_airtime_limit == 0) return true;
 
   unsigned long now = millis();
@@ -290,14 +300,17 @@ uint8_t configure_modem(uint8_t chan, uint8_t rate, bool setRate) {
       DebugSerial.println("!!! E32 configuration set FAILED");
       #endif
       e32_modem_errors++;
+      modem_ok = false;
       return -1;
     }
+    modem_ok = true;
     //#ifdef DEBUG_ENABLED
     //printParameters(configuration);
     //#endif
   } else {
     rc = -1;
     e32_modem_errors++;
+    modem_ok = false;
     #ifdef DEBUG_ENABLED
     DebugSerial.println("!!! E32 configuration read FAILED");
     #endif
@@ -309,6 +322,10 @@ ResponseStatus send_to_e32(const uint8_t* data, uint16_t len) {
   if (len == 0 || len > MTU) {
     return ResponseStatus{.code = ERR_E32_PACKET_TOO_BIG};
   }
+  #ifdef USE_POWERSAVE
+  e32ttl.setMode(MODE_1_WAKE_UP); // wakeup and send with big preamble
+  #endif
+
   uint8_t prefixed[MTU + 4];           // 2 (length) + data + 2 (CRC)
   prefixed[0] = (uint8_t)(len >> 8);
   prefixed[1] = (uint8_t)len;
@@ -333,8 +350,7 @@ ResponseStatus send_to_e32(const uint8_t* data, uint16_t len) {
     
     unsigned long start = millis();
     while (digitalRead(AUX_PIN) == LOW) {
-      unsigned long wait_time = (cur_sf < 10) ? 3000 : ((cur_sf < 11) ? 4000 : 6000);
-      if (millis() - start > wait_time) {
+      if (millis() - start > 6000) {
         #ifdef DEBUG_ENABLED
         DebugSerial.println("AUX timeout during TX");
         #endif
@@ -359,11 +375,21 @@ ResponseStatus send_to_e32(const uint8_t* data, uint16_t len) {
 
     sent += chunk_size;
     delay(8);
+
+    #ifdef USE_POWERSAVE
+    if (sent < len) {
+      e32ttl.setMode(MODE_0_NORMAL); // send other chunks in normal mode
+    }
+    #endif
   }
 
   update_airtime((millis() - tx_start) * 2); // yes it is * 2
 
   update_traffic_stats(0, len-4);
+
+  #ifdef USE_POWERSAVE
+  e32ttl.setMode(MODE_2_POWER_SAVING); // go to sleep again
+  #endif
   return status;
 }
 
@@ -453,7 +479,9 @@ void e32_process_rx() {
 
 void check_storage_and_name() {
   if (!prefs.begin("rnode", true)) {
+    #ifdef DEBUG_ENABLED
     DebugSerial.println("Failed to open NVS! Formatting...");
+    #endif
     prefs.begin("rnode", false);
     prefs.clear();
     prefs.end();
@@ -502,6 +530,9 @@ void setup() {
   cfg_power_measure();
   //init_temperature_sensor();
   check_modem_configuration();
+  #ifdef USE_POWERSAVE
+  e32ttl.setMode(MODE_2_POWER_SAVING); // always in powersave, wake up for transmit only
+  #endif
 
   #ifdef USE_WIFI
   wifi_init();
@@ -977,6 +1008,7 @@ void kiss_indicate_wifi_mode() {
 }
 
 void printParameters(struct Configuration configuration) {
+  #ifdef DEBUG_ENABLED
   DebugSerial.println("----------------------------------------");
 	DebugSerial.print(F("HEAD : "));  DebugSerial.print(configuration.HEAD, BIN);DebugSerial.print(" ");DebugSerial.print(configuration.HEAD, DEC);DebugSerial.print(" ");DebugSerial.println(configuration.HEAD, HEX);
 	DebugSerial.print(F("AddH : "));  DebugSerial.println(configuration.ADDH, DEC);
@@ -991,4 +1023,5 @@ void printParameters(struct Configuration configuration) {
 	DebugSerial.print(F("OptionFEC          : "));  DebugSerial.print(configuration.OPTION.fec, BIN);DebugSerial.print(" -> "); DebugSerial.println(configuration.OPTION.getFECDescription());
 	DebugSerial.print(F("OptionPower        : "));  DebugSerial.print(configuration.OPTION.transmissionPower, BIN);DebugSerial.print(" -> "); DebugSerial.println(configuration.OPTION.getTransmissionPowerDescription());
 	DebugSerial.println("----------------------------------------");
+  #endif
 }

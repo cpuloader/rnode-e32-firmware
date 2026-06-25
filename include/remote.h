@@ -8,9 +8,9 @@ WiFiServer kissServer(TCP_PORT);
 WiFiClient kissClient;
 
 bool wifi_connected();
-bool wifi_save_ssid();
-bool wifi_save_psk();
-bool wifi_save_mode();
+void wifi_save_ssid();
+void wifi_save_psk();
+void wifi_save_mode();
 
 bool wifi_connected() {
   if (!wifi_active) return false;
@@ -44,16 +44,22 @@ void wifi_init() {
     DebugSerial.printf("!!! No WIFI data: %s %s\n", wifi_ssid, wifi_psk);
     #endif
     return;
-  }// else {
-  //  #ifdef DEBUG_ENABLED
-  //  DebugSerial.printf("WIFI data: %s %s\n", wifi_ssid, wifi_psk);
-  //  #endif
-  //}
+  } else {
+    #ifdef DEBUG_ENABLED
+    DebugSerial.printf("WIFI data: %s %s\n", wifi_ssid, wifi_psk);
+    #endif
+  }
   #ifdef DEBUG_ENABLED
   DebugSerial.println("Connecting to WiFi...");
   #endif
+  WiFi.setHostname(device_name);
   WiFi.mode(WIFI_STA);
   WiFi.setAutoReconnect(true);
+
+  #if defined(BOARD_ESP32C3)
+  WiFi.setTxPower(WIFI_POWER_2dBm); // of WiFi will not connect, interference, board imperfection 
+  #endif
+
   WiFi.begin(wifi_ssid, wifi_psk);
 
   unsigned long timeout = millis() + 20000;
@@ -84,8 +90,9 @@ void wifi_init() {
 
 void(*wifi_process_kiss_byte_fn_ptr)(uint8_t);
 
-void handle_tcp_kiss() {
-  if (!wifi_active) return;
+bool handle_tcp_kiss() {
+  if (!wifi_active) return false;
+  bool received = false;
 
   if (kissServer.hasClient()) {
     if (kissClient && kissClient.connected()) {
@@ -104,10 +111,12 @@ void handle_tcp_kiss() {
     while (kissClient.available()) {
       uint8_t byte = kissClient.read();
       wifi_process_kiss_byte_fn_ptr(byte);
+      received = true;
     }
   } else if (kissClient) {
     kissClient.stop();
   }
+  return received;
 }
 
 
@@ -128,19 +137,19 @@ void send_kiss_packet_tcp(uint8_t cmd, const uint8_t* data, uint16_t len) {
   kissClient.write(FEND);
 }
 
-bool wifi_save_ssid() {
+void wifi_save_ssid() {
   prefs.begin("rnode", false);
   prefs.putString("wifi_ssid", wifi_ssid);
   prefs.end();
 }
 
-bool wifi_save_psk() {
+void wifi_save_psk() {
   prefs.begin("rnode", false);
   prefs.putString("wifi_pass", wifi_psk);
   prefs.end();
 }
 
-bool wifi_save_mode() {
+void wifi_save_mode() {
   prefs.begin("rnode", false);
   prefs.putUChar("wf_flag", wifi_enabled ? 1 : 0);
   prefs.end();

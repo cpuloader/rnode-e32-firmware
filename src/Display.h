@@ -48,7 +48,9 @@ void update_display() {
   u8g2.print(" MHz, SF: ");
   u8g2.print(cur_sf); 
 
-  if (cur_radio_state == RADIO_STATE_ON) {
+  if (!modem_ok) {
+    u8g2.drawStr(0, 43, "Radio is not OK");
+  } else if (cur_radio_state == RADIO_STATE_ON) {
     // RX
     u8g2.drawStr(0, 43, "RX");
     u8g2.setCursor(25, 43);

@@ -21,7 +21,7 @@ Preferences prefs;
 HardwareSerial DebugSerial(1);
 #endif
 
-#define USE_WIFI
+//#define USE_WIFI
 //#define USE_BT
 
 #define M0_PIN 21
@@ -44,7 +44,7 @@ SoftwareSerial DebugSerial(DEBUG_RX,DEBUG_TX);
 #endif
 
 //#define USE_WIFI
-#define USE_BT
+//#define USE_BT
 
 #define E32_TX_PIN 3
 #define E32_RX_PIN 4
@@ -159,7 +159,7 @@ bool bt_allow_pairing = false;
 bool wifi_enabled = false;
 bool wifi_active = false;
 
-
+bool modem_ok = true;
 bool console_active = false;
 
 char device_name[11] = "RNode 0000";
@@ -258,7 +258,7 @@ float read_battery_voltage() {
   }
   
   float voltage_at_pin = (sum / (float)samples) / 1000.0f;
-  float battery_voltage = voltage_at_pin * 2.0f;
+  float battery_voltage = voltage_at_pin * 2.0f * 1.05f; // special coef
   
   return battery_voltage;
 }
