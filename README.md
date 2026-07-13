@@ -27,5 +27,5 @@ NVS_WIFION   = 0
 NVS_BLEON    = 1
 ```
 
-![screenshot](folder-name/1.jpg)
-![screenshot](folder-name/2.jpg)
+![pic1](https://github.com/cpuloader/rnode-e32-firmware/blob/main/photos/1.jpg?raw=true)
+![pic2](https://github.com/cpuloader/rnode-e32-firmware/blob/main/photos/2.jpg?raw=true)
