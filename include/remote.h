@@ -44,11 +44,11 @@ void wifi_init() {
     DebugSerial.printf("!!! No WIFI data: %s %s\n", wifi_ssid, wifi_psk);
     #endif
     return;
-  } else {
-    #ifdef DEBUG_ENABLED
-    DebugSerial.printf("WIFI data: %s %s\n", wifi_ssid, wifi_psk);
-    #endif
-  }
+  }// else {
+   // #ifdef DEBUG_ENABLED
+  //  DebugSerial.printf("WIFI data: %s %s\n", wifi_ssid, wifi_psk);
+  //  #endif
+  //}
   #ifdef DEBUG_ENABLED
   DebugSerial.println("Connecting to WiFi...");
   #endif

@@ -270,12 +270,16 @@ void check_modem_configuration() {
       DebugSerial.println("!!! E32 configuration set FAILED");
       #endif
       e32_modem_errors++;
+      modem_ok = false;
+    } else {
+      modem_ok = true;
     }
   } else {
     #ifdef DEBUG_ENABLED
     DebugSerial.println("!!! E32 configuration read FAILED");
     #endif
     e32_modem_errors++;
+    modem_ok = false;
   }
 }
 
