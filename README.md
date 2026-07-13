@@ -1,7 +1,7 @@
 # RNode Firmware for ESP32 + EBYTE E32-170T30D
 
 E32-170T30D is 1W 170MHz module, have no SPI interface, UART only.  
-Warning! This firmware is not compartible with others.  
+Warning! This firmware is not compatible with others.  
 
 ## Boards currently supported:
 ESP32C3  
@@ -27,5 +27,5 @@ NVS_WIFION   = 0
 NVS_BLEON    = 1
 ```
 
-<img src="folder-name/1.jpg">
-<img src="folder-name/2.jpg">
+![screenshot](folder-name/1.jpg)
+![screenshot](folder-name/2.jpg)
